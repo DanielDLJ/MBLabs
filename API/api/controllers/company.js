@@ -1,31 +1,31 @@
 // Database
 const Op = require('sequelize').Sequelize.Op;
-const User = require('../models/User');
+const Company = require('../models/Company');
 
 
 const bcrypt = require('bcryptjs');
 const salt = bcrypt.genSaltSync(10);
 
 exports.company_get_all = (req, res, next) => {
-    User.findAll({
+    Company.findAll({
         order: [
             ['name', 'ASC']
         ]
     })
-    .then(user => res.status(200).json({ status: 1, data: user }))
+    .then(company => res.status(200).json({ status: 1, data: company }))
     .catch(async error => {
         let err =  await generic_error(error,1)
         next(err);
     })
 };
 
-exports.company_create_users = async (req, res, next) => {
-    let { cpf, name, password, birthday, cep, address, number, complement, district, city, state, celular, image } = req.body
+exports.company_create_company = async (req, res, next) => {
+    let { cnpj, name, password, cep, address, number, complement, district, city, state, celular, image } = req.body
 
     console.log("************Data************")
     console.log(req.body)
 
-    if (!cpf || !name || !password || !birthday ) {
+    if (!cnpj || !name || !password ) {
         let err = new Error('Essa resposta é enviada quando o servidor da Web após realizar a negociação de conteúdo orientada pelo servidor, não encontra nenhum conteúdo seguindo os critérios fornecidos pelo agente do usuário.');
         err.status = 406;
         err.code = 1
@@ -33,11 +33,11 @@ exports.company_create_users = async (req, res, next) => {
     } else {
         req.body.password = bcrypt.hashSync(req.body.password, salt);
         var db = require('../config/database').sequelize;
-        await User.create(req.body)
-        .then(async createdUser =>{ 
-            await User.findByPk(cpf)
-            .then(user => {
-                res.status(200).json({status: 1, data: user? user : {}})
+        await Company.create(req.body)
+        .then(async createdCompany =>{ 
+            await Company.findByPk(cnpj)
+            .then(company => {
+                res.status(200).json({status: 1, data: company? company : {}})
             })
             .catch(async error => {
                 let err =  await generic_error(error,2)
@@ -53,10 +53,10 @@ exports.company_create_users = async (req, res, next) => {
 };
 
 exports.company_get_company = (req, res, next) => {
-    const cpf = req.params.userCPF
-    User.findByPk(cpf)
-    .then(user => {
-        res.status(200).json({status: 1, data: user ? user : {}})
+    const cnpj = req.params.companyCNPJ
+    Company.findByPk(cnpj)
+    .then(company => {
+        res.status(200).json({status: 1, data: company ? company : {}})
     })
     .catch(async error => {
         let err =  await generic_error(error,1)
@@ -65,14 +65,14 @@ exports.company_get_company = (req, res, next) => {
 };
 
 exports.company_update_company = async (req, res, next) => {
-    const userCPF = req.params.userCPF
-    let { cpf, name, password, birthday, cep, address, number, complement, district, city, state, celular, image } = req.body
-    console.log("Update an account by cpf = " + cpf);
+    const companyCNPJ = req.params.companyCNPJ
+    let { cnpj, name, password, birthday, cep, address, number, complement, district, city, state, celular, image } = req.body
+    console.log("Update an account by cnpj = " + companyCNPJ);
     console.log("req.body", req.body);
 
     if (password != undefined) req.body.password = bcrypt.hashSync(req.body.password, salt);
 
-    if (cpf) {
+    if (cnpj) {
         let err = new Error('Essa resposta é enviada quando o servidor da Web após realizar a negociação de conteúdo orientada pelo servidor, não encontra nenhum conteúdo seguindo os critérios fornecidos pelo agente do usuário.');
         err.status = 406;
         err.code = 1;
@@ -80,24 +80,24 @@ exports.company_update_company = async (req, res, next) => {
         return
     }
 
-    const user = await User.findOne({ where: { cpf: userCPF } });
-    if (!user) {
-        let err = new Error('Usuário não existe!');
+    const company = await Company.findOne({ where: { cnpj: companyCNPJ } });
+    if (!company) {
+        let err = new Error('Empresa não existe!');
         err.status = 404;
         err.code = 2;
         next(err);
         return;
     }
 
-    await User.update(req.body, {
+    await Company.update(req.body, {
         where: {
-            cpf: userCPF
+            cnpj: companyCNPJ
         }
     })
-    .then(async updatedUser => {
-        await User.findByPk(userCPF)
-            .then(user => {
-                res.status(200).json({status: 1, data: user? user : {}})
+    .then(async updatedCompany => {
+        await Company.findByPk(companyCNPJ)
+            .then(company => {
+                res.status(200).json({status: 1, data: company? company : {}})
             })
             .catch(async error => {
                 let err =  await generic_error(error,3)
@@ -111,26 +111,26 @@ exports.company_update_company = async (req, res, next) => {
 };
 
 exports.company_delete_company = async (req, res, next) => {
-    const cpf = req.params.userCPF
+    const cnpj = req.params.companyCNPJ
     let { disabled } = req.body
     try {
-        const user = await User.findOne({ where: { cpf } });
-        if (!user) {
-            let err = new Error('Usuário não existe!');
+        const company = await Company.findOne({ where: { cnpj } });
+        if (!company) {
+            let err = new Error('Empresa não existe!');
             err.status = 404;
             err.code = 1
             next(err);
             return;
         }
-        await User.update({disabled: disabled !== undefined ? disabled : 1}, {
+        await Company.update({disabled: disabled !== undefined ? disabled : 1}, {
             where: {
-                cpf: cpf
+                cnpj: cnpj
             }
         })
 
-        await User.findByPk(cpf)
-        .then(user => {
-            res.status(200).json({status: 1, data: user? user : {}})
+        await Company.findByPk(cnpj)
+        .then(company => {
+            res.status(200).json({status: 1, data: company? company : {}})
         })
         .catch(async error => {
             let err =  await generic_error(error,2)

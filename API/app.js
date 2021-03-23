@@ -28,6 +28,7 @@ app.use((req, res, next) => {
 
 //Declaring the constants of routes
 const userRoutes = require('./api/routes/users')
+const companyRoutes = require('./api/routes/company')
 
 //app.use(morgan('dev'))
 app.use(morgan('short'))
@@ -36,6 +37,8 @@ app.use(bodyParser.json())
 
 //Routes which should handle requests
 app.use('/users', userRoutes)
+app.use('/company', companyRoutes)
+
 
 app.get('/', (req, res) => {
     res.send('Api Event Day')

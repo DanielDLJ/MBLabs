@@ -11,7 +11,7 @@ const CompanyController = require ('../controllers/company')
 router.get('/', CompanyController.company_get_all)
 
 //Create a company account
-router.post('/', upload.none(), CompanyController.company_create_users)
+router.post('/', upload.none(), CompanyController.company_create_company)
 
 //Get an account by CNPJ
 router.get('/:companyCNPJ', CompanyController.company_get_company)
