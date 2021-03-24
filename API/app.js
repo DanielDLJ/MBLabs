@@ -29,6 +29,7 @@ app.use((req, res, next) => {
 //Declaring the constants of routes
 const userRoutes = require('./api/routes/users')
 const companyRoutes = require('./api/routes/company')
+const authRoutes = require('./api/routes/auth')
 
 //app.use(morgan('dev'))
 app.use(morgan('short'))
@@ -38,6 +39,7 @@ app.use(bodyParser.json())
 //Routes which should handle requests
 app.use('/users', userRoutes)
 app.use('/company', companyRoutes)
+app.use('/auth', authRoutes)
 
 
 app.get('/', (req, res) => {
