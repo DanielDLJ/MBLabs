@@ -47,6 +47,7 @@ exports.users_create_users = async (req, res, next) => {
         .catch(async error => {
             let err =  await generic_error(error,5)
             if(error && error.original && error.original.errno === 1062){//ER_DUP_ENTRY
+                err.status = 409;
                 if(error.original.sqlMessage?.includes('email_user')){
                     err.code = 3
                     err.message = "Email já está em uso!"
