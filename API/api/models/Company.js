@@ -14,6 +14,10 @@ module.exports = db.sequelize.define('company',{
         type: Sequelize.STRING,
         allowNull: false
     },
+    email:{
+        type: Sequelize.STRING,
+        allowNull: false
+    },
     cep:{
         type: Sequelize.STRING,
         allowNull: true

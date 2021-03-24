@@ -20,12 +20,12 @@ exports.users_get_all = (req, res, next) => {
 };
 
 exports.users_create_users = async (req, res, next) => {
-    let { cpf, name, password, birthday, cep, address, number, complement, district, city, state, celular, image } = req.body
+    let { cpf, name, password, birthday, email, cep, address, number, complement, district, city, state, celular, image } = req.body
 
     console.log("************Data************")
     console.log(req.body)
 
-    if (!cpf || !name || !password || !birthday ) {
+    if (!cpf || !name || !password || !birthday || !email ) {
         let err = new Error('Essa resposta é enviada quando o servidor da Web após realizar a negociação de conteúdo orientada pelo servidor, não encontra nenhum conteúdo seguindo os critérios fornecidos pelo agente do usuário.');
         err.status = 406;
         err.code = 1
@@ -45,7 +45,17 @@ exports.users_create_users = async (req, res, next) => {
             })
         })
         .catch(async error => {
-            let err =  await generic_error(error,3)
+            let err =  await generic_error(error,5)
+            if(error && error.original && error.original.errno === 1062){//ER_DUP_ENTRY
+                if(error.original.sqlMessage?.includes('email_user')){
+                    err.code = 3
+                    err.message = "Email já está em uso!"
+                }
+                if(error.original.sqlMessage?.includes('PRIMARY')){
+                    err.code = 4
+                    err.message = "CPF já está em uso!"
+                }
+            } 
             next(err);
         })
         
@@ -66,7 +76,7 @@ exports.users_get_users = (req, res, next) => {
 
 exports.users_update_users = async (req, res, next) => {
     const userCPF = req.params.userCPF
-    let { cpf, name, password, birthday, cep, address, number, complement, district, city, state, celular, image } = req.body
+    let { cpf, name, password, birthday, email, cep, address, number, complement, district, city, state, celular, image } = req.body
     console.log("Update an account by cpf = " + cpf);
     console.log("req.body", req.body);
 
@@ -105,7 +115,14 @@ exports.users_update_users = async (req, res, next) => {
             })
     })
     .catch(async error => {
-        let err =  await generic_error(error,4)
+        let err =  await generic_error(error,5)
+        if(error && 
+            error.original && 
+            error.original.errno === 1062 &&
+             error.original.sqlMessage?.includes('email_user')){ //ER_DUP_ENTRY 
+            err.code = 4
+            err.message = "Email já está em uso!"
+        }
         next(err);
     })
 };

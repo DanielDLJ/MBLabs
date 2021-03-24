@@ -20,12 +20,12 @@ exports.company_get_all = (req, res, next) => {
 };
 
 exports.company_create_company = async (req, res, next) => {
-    let { cnpj, name, password, cep, address, number, complement, district, city, state, celular, image } = req.body
+    let { cnpj, name, password, email, cep, address, number, complement, district, city, state, celular, image } = req.body
 
     console.log("************Data************")
     console.log(req.body)
 
-    if (!cnpj || !name || !password ) {
+    if (!cnpj || !name || !password || !email) {
         let err = new Error('Essa resposta é enviada quando o servidor da Web após realizar a negociação de conteúdo orientada pelo servidor, não encontra nenhum conteúdo seguindo os critérios fornecidos pelo agente do usuário.');
         err.status = 406;
         err.code = 1
@@ -45,7 +45,17 @@ exports.company_create_company = async (req, res, next) => {
             })
         })
         .catch(async error => {
-            let err =  await generic_error(error,3)
+            let err =  await generic_error(error,5)
+            if(error && error.original && error.original.errno === 1062){//ER_DUP_ENTRY
+                if(error.original.sqlMessage?.includes('email_company')){
+                    err.code = 3
+                    err.message = "Email já está em uso!"
+                }
+                if(error.original.sqlMessage?.includes('PRIMARY')){
+                    err.code = 4
+                    err.message = "CNPJ já está em uso!"
+                }
+            } 
             next(err);
         })
         
@@ -66,7 +76,7 @@ exports.company_get_company = (req, res, next) => {
 
 exports.company_update_company = async (req, res, next) => {
     const companyCNPJ = req.params.companyCNPJ
-    let { cnpj, name, password, birthday, cep, address, number, complement, district, city, state, celular, image } = req.body
+    let { cnpj, name, password, email, birthday, cep, address, number, complement, district, city, state, celular, image } = req.body
     console.log("Update an account by cnpj = " + companyCNPJ);
     console.log("req.body", req.body);
 
@@ -105,7 +115,14 @@ exports.company_update_company = async (req, res, next) => {
             })
     })
     .catch(async error => {
-        let err =  await generic_error(error,4)
+        let err =  await generic_error(error,5)
+        if(error && 
+            error.original && 
+            error.original.errno === 1062 &&
+             error.original.sqlMessage?.includes('email_company')){ //ER_DUP_ENTRY 
+            err.code = 4
+            err.message = "Email já está em uso!"
+        }
         next(err);
     })
 };
