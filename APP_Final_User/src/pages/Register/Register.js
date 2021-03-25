@@ -48,7 +48,7 @@ export default function Register({ navigation }) {
       setCPF({value: cpf.value, error: "CPF Inválido"})
       valid = false
     }
-    if(password.value.length < 6 ) {
+    if(name.value.length < 6 ) {
       setName({value: name.value, error: "O nome deve conter no mínimo 6 caracteres"})
       valid = false
     }

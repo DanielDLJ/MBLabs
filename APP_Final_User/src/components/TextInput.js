@@ -3,26 +3,47 @@ import { View, StyleSheet, Text } from 'react-native';
 import { TextInput as Input, HelperText } from 'react-native-paper';
 
 const TextInput = React.forwardRef((props, ref) => {
-  const {errorText, ...others} = props;
+  const {errorText, typeTheme, ...others} = props;
   return(<View style={styles.container}>
-    <Input
-      style={styles.input}
-      underlineColor="transparent"
-      mode="outlined"
-      ref={ref}
-      theme={{
-        colors: {
-          placeholder: '#9b9bc2',  //No selected (placeholder and label)
-          text: '#9b9bc2',  //text of textinput
-          primary: '#cacaed', //Selected (edge and label )
-          underlineColor: 'transparent', 
-          colorAccent: 'transparent', 
-          background:'rgba(81, 81, 92, 0.8)',
-          error:"#ff0000"
-        }
-     }}
-      {...others}
-    />
+    {typeTheme === "light"?
+      <Input
+        style={styles.input}
+        underlineColor="transparent"
+        mode="outlined"
+        ref={ref}
+        theme={{
+          colors: {
+            placeholder: 'white',  //No selected (placeholder and label)
+            text: 'white',  //text of textinput
+            primary: 'white', //Selected (edge and label )
+            underlineColor: 'transparent', 
+            colorAccent: 'transparent', 
+            background:'rgba(145, 145, 145, 0.7)',
+            error:"#ff0000",
+            disabled:"#e8e8e8"
+          }
+        }}
+        {...others}
+      />
+    :<Input
+        style={styles.input}
+        underlineColor="transparent"
+        mode="outlined"
+        ref={ref}
+        theme={{
+          colors: {
+            placeholder: '#9b9bc2',  //No selected (placeholder and label)
+            text: '#9b9bc2',  //text of textinput
+            primary: '#cacaed', //Selected (edge and label )
+            underlineColor: 'transparent', 
+            colorAccent: 'transparent', 
+            background:'rgba(81, 81, 92, 0.8)',
+            error:"#ff0000"
+          }
+        }}
+        {...others}
+      />
+    }
     {errorText ? <Text style={styles.error}>{errorText}</Text> : null}
   </View>
 )});

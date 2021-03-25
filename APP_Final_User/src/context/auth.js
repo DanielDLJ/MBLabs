@@ -12,12 +12,12 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     async function loadStorageData() {
-      const fakeUser = {
-        cpf: "41999741803",
-        name: "Daniel",
-      }
-
-      await clearStorage()
+      // const fakeUser = {
+      //   cpf: "41999741803",
+      //   name: "Daniel",
+      //   image: ""
+      // }
+      // await clearStorage()
       // await storeUser(fakeUser)
 
       const storedUser = await getStoredUser();
@@ -131,7 +131,47 @@ export const AuthProvider = ({ children }) => {
 
   }
 
-  function signOut() {
+  async function update(updateUser) {
+    let message = ""
+    let returnStatus = false
+    try {
+      const result = await api.patch('/users/'+user.cpf, updateUser);
+      console.log(result.data)
+      await storeUser(result.data.data)
+      message = "Dados atualizados =) "
+      returnStatus = true 
+    } catch (error) {
+      returnStatus = false 
+      console.log('error update', error);
+      console.log('error update', error.response);
+      switch (error.response === undefined ? 65465 : error.response.status) {
+        case 406:
+          message = 'Formato de CPF, nome, senha ou email inválido.'
+          break;
+        case 404:
+          message = "Usuário não existe!"
+          break;
+        case 409:
+          const errorCode = error.response.data.error.code;
+          if (errorCode === 4) {
+            message = error.response.data.error.message
+          }else{
+            message = "Erro imprevisto"
+          }
+          break;
+        case 500:
+          message = 'Problemas com o servidor.'
+          break;
+        default:
+          message = 'Verifique sua conexão com a internet.'
+          break;
+      }
+    }
+    toastMessage(message,returnStatus)
+    return returnStatus
+  }
+
+  function logout() {
     clearStorage().then(() => {
       setUser(null);
     });
@@ -149,6 +189,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const cpf = await AsyncStorage.getItem('user_cpf');
       const name = await AsyncStorage.getItem('user_name');
+      const image = await AsyncStorage.getItem('user_image');
 
       if (cpf == null) {
         return null;
@@ -157,6 +198,7 @@ export const AuthProvider = ({ children }) => {
       return {
         cpf: cpf,
         name: name ? name : "",
+        image: image ? image : "",
       };
     } catch (e) {
       console.log('[AuthProvider getData]', e);
@@ -166,8 +208,9 @@ export const AuthProvider = ({ children }) => {
   async function storeUser(_user) {
     try {
       console.log("storeUser",_user)
-      await AsyncStorage.setItem('company_cpf', _user.cpf);
-      await AsyncStorage.setItem('company_name', _user.name);
+      await AsyncStorage.setItem('user_cpf', _user.cpf);
+      await AsyncStorage.setItem('user_name', _user.name);
+      await AsyncStorage.setItem('user_image', _user.image);
       setUser(_user)
     } catch (e) {
       console.log('[AuthContext storeDataUser]', e);
@@ -185,7 +228,8 @@ export const AuthProvider = ({ children }) => {
         setLoadingSplash,
         signIn,
         signUp,
-        signOut,
+        logout,
+        update,
       }}>
       {children}
     </AuthContext.Provider>
