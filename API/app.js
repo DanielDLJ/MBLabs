@@ -40,6 +40,7 @@ app.use(bodyParser.json())
 app.use('/users', userRoutes)
 app.use('/company', companyRoutes)
 app.use('/auth', authRoutes)
+app.use('/uploads/User', express.static('uploads/User'))
 
 
 app.get('/', (req, res) => {

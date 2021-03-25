@@ -120,9 +120,10 @@ exports.company_update_company = async (req, res, next) => {
         if(error && 
             error.original && 
             error.original.errno === 1062 &&
-             error.original.sqlMessage?.includes('email_company')){ //ER_DUP_ENTRY 
-            err.code = 4
-            err.message = "Email já está em uso!"
+            error.original.sqlMessage?.includes('email_company')){ //ER_DUP_ENTRY 
+                err.status = 409;
+                err.code = 4
+                err.message = "Email já está em uso!"
         }
         next(err);
     })
