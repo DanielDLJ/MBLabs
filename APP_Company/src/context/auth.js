@@ -12,12 +12,12 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     async function loadStorageData() {
-      const fakeCompany = {
-        cnpj: "12100515000142",
-        name: "Rock in Rio",
-      }
+      // const fakeCompany = {
+      //   cnpj: "12100515000142",
+      //   name: "Rock in Rio",
+      // }
 
-      await clearStorage()
+      // await clearStorage()
       // await storeCompany(fakeCompany)
 
       const storedCompany = await getStoredCompany();
@@ -131,7 +131,48 @@ export const AuthProvider = ({ children }) => {
 
   }
 
-  function signOut() {
+  async function update(updateCompany) {
+    let message = ""
+    let returnStatus = false
+    try {
+      const result = await api.patch('/company/'+company.cnpj, updateCompany);
+      console.log(result.data)
+      await storeCompany(result.data.data)
+      message = "Dados atualizados =) "
+      returnStatus = true 
+    } catch (error) {
+      returnStatus = false 
+      console.log('error update', error);
+      console.log('error update', error.response);
+      switch (error.response === undefined ? 65465 : error.response.status) {
+        case 406:
+          message = 'Formato de CNPJ, nome, senha ou email inválido.'
+          break;
+        case 404:
+          message = "Empresa não existe!"
+          break;
+        case 409:
+          const errorCode = error.response.data.error.code;
+          if (errorCode === 4) {
+            message = error.response.data.error.message
+          }else{
+            message = "Erro imprevisto"
+          }
+          break;
+        case 500:
+          message = 'Problemas com o servidor.'
+          break;
+        default:
+          message = 'Verifique sua conexão com a internet.'
+          break;
+      }
+    }
+    toastMessage(message,returnStatus)
+    return returnStatus
+  }
+
+
+  function logout() {
     clearStorage().then(() => {
       setCompany(null);
     });
@@ -149,6 +190,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const cnpj = await AsyncStorage.getItem('company_cnpj');
       const name = await AsyncStorage.getItem('company_name');
+      const image = await AsyncStorage.getItem('company_image');
 
       if (cnpj == null) {
         return null;
@@ -157,6 +199,7 @@ export const AuthProvider = ({ children }) => {
       return {
         cnpj: cnpj,
         name: name ? name : "",
+        image: image ? image : "",
       };
     } catch (e) {
       console.log('[AuthProvider getData]', e);
@@ -168,6 +211,7 @@ export const AuthProvider = ({ children }) => {
       console.log("storeCompany",_company)
       await AsyncStorage.setItem('company_cnpj', _company.cnpj);
       await AsyncStorage.setItem('company_name', _company.name);
+      await AsyncStorage.setItem('company_image', _company.image);
       setCompany(_company)
     } catch (e) {
       console.log('[AuthContext storeDataCompany]', e);
@@ -185,7 +229,8 @@ export const AuthProvider = ({ children }) => {
         setLoadingSplash,
         signIn,
         signUp,
-        signOut,
+        update,
+        logout,
       }}>
       {children}
     </AuthContext.Provider>
