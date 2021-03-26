@@ -17,6 +17,7 @@ const fileFilters = (req, file, cb) => {
 * Storage Configuration
 * by folder 
 * ./uploads/User
+* ./uploads/Company
 */
 const storage_User = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -27,13 +28,29 @@ const storage_User = multer.diskStorage({
     }
 })
 
+
+const storage_Company = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './uploads/Company');
+    },
+    filename: function (req, file, cb) {
+        cb(null, moment().format('YYYYMMDDHHms') + path.extname(file.originalname));
+    }
+})
+
 /*
 * multer export
 * by folder 
 * ./uploads/User
+* ./uploads/Company
 */
 
 exports.upload_User = multer({
     storage: storage_User,
+    fileFilter: fileFilters
+})
+
+exports.upload_Company = multer({
+    storage: storage_Company,
     fileFilter: fileFilters
 })

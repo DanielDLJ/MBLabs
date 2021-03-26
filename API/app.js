@@ -41,6 +41,7 @@ app.use('/users', userRoutes)
 app.use('/company', companyRoutes)
 app.use('/auth', authRoutes)
 app.use('/uploads/User', express.static('uploads/User'))
+app.use('/uploads/Company', express.static('uploads/Company'))
 
 
 app.get('/', (req, res) => {
