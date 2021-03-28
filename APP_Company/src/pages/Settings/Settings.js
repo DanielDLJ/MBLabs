@@ -112,6 +112,7 @@ function Settings({navigation}) {
             />
           )}
         </TouchableOpacity>
+        
         <Text style={styles.titleName}> {company ? company.name : ''}</Text>
       </View>
 

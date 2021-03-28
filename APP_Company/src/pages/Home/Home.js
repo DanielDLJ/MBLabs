@@ -5,21 +5,30 @@ import {
     StyleSheet,
     Dimensions,
 } from 'react-native'
-
-const {width, height} = Dimensions.get('window')
+import ItemMenu from '../../components/ItemMenu'
 import AuthContext  from '../../context/auth';
-
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 function Home({ navigation }) {
     const {  } = useContext(AuthContext);
-
 
     return (
         <View
             style={styles.container}
         >
             <Text style={styles.title} >Home </Text>
-            
+            <View style={styles.containerMenu}>
+                <ItemMenu
+                    nameIcon={"settings"}
+                    onPress={()=> navigation.navigate('Settings')}
+                    name={"Configurações"}
+                />
+                <ItemMenu
+                    nameIcon={"event"}
+                    onPress={()=> navigation.navigate('ListEvents')}
+                    name={"Eventos"}
+                />
+            </View>
 
         </View>
     );
@@ -28,6 +37,7 @@ function Home({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex:1,
+        backgroundColor: '#b5b5b5',
     },
     title: {
         marginTop: 10,
@@ -35,6 +45,11 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         fontWeight: 'bold',
         color: '#696969'
+    },
+    containerMenu: {
+        marginTop:50,
+        justifyContent:"space-between",
+        flexDirection:"row"
     },
 })
 
