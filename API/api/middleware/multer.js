@@ -18,6 +18,7 @@ const fileFilters = (req, file, cb) => {
 * by folder 
 * ./uploads/User
 * ./uploads/Company
+* ./uploads/Event
 */
 const storage_User = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -38,11 +39,21 @@ const storage_Company = multer.diskStorage({
     }
 })
 
+const storage_Event = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './uploads/Event');
+    },
+    filename: function (req, file, cb) {
+        cb(null, moment().format('YYYYMMDDHHms') + path.extname(file.originalname));
+    }
+})
+
 /*
 * multer export
 * by folder 
 * ./uploads/User
 * ./uploads/Company
+* ./uploads/Event
 */
 
 exports.upload_User = multer({
@@ -52,5 +63,10 @@ exports.upload_User = multer({
 
 exports.upload_Company = multer({
     storage: storage_Company,
+    fileFilter: fileFilters
+})
+
+exports.upload_Event = multer({
+    storage: storage_Event,
     fileFilter: fileFilters
 })

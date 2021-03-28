@@ -30,6 +30,7 @@ app.use((req, res, next) => {
 const userRoutes = require('./api/routes/users')
 const companyRoutes = require('./api/routes/company')
 const authRoutes = require('./api/routes/auth')
+const eventRoutes = require('./api/routes/event')
 
 //app.use(morgan('dev'))
 app.use(morgan('short'))
@@ -40,9 +41,10 @@ app.use(bodyParser.json())
 app.use('/users', userRoutes)
 app.use('/company', companyRoutes)
 app.use('/auth', authRoutes)
+app.use('/event', eventRoutes)
 app.use('/uploads/User', express.static('uploads/User'))
 app.use('/uploads/Company', express.static('uploads/Company'))
-
+app.use('/uploads/Event', express.static('uploads/Event'))
 
 app.get('/', (req, res) => {
     res.send('Api Event Day')
