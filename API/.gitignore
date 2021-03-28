@@ -2,3 +2,4 @@ node_modules/
 yarn.lock
 uploads/User
 uploads/Company
+uploads/Event
