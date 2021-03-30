@@ -1,10 +1,12 @@
 // Database
-const Op = require("sequelize").Sequelize.Op;
+const { Op } = require("sequelize");
 const Company = require("../models/Company");
 const Event = require("../models/Event");
 const EventUser = require("../models/EventUser");
 const User = require("../models/User");
+const Category = require("../models/Category");
 
+const _ = require("lodash");
 const bcrypt = require("bcryptjs");
 const salt = bcrypt.genSaltSync(10);
 const fs = require("fs");
@@ -15,7 +17,7 @@ exports.event_get_all = (req, res, next) => {
 
   var whereCondition = {};
   if (cnpj) whereCondition = { company_cnpj: cnpj };
-
+  console.log("whereCondition", whereCondition);
   Event.findAll({
     where: { ...whereCondition, disabled: false },
     order: [["name", "ASC"]],
@@ -212,6 +214,7 @@ exports.event_delete_event = async (req, res, next) => {
 exports.event_get_users = (req, res, next) => {
   const id_event = req.params.eventID;
 
+  console.log("event_get_users", id_event);
   EventUser.findAll({
     where: { id_event: id_event },
     include: [
@@ -223,6 +226,30 @@ exports.event_get_users = (req, res, next) => {
     ],
   })
     .then((users) => res.status(200).json({ status: 1, data: users }))
+    .catch(async (error) => {
+      let err = await generic_error(error, 1);
+      next(err);
+    });
+};
+
+exports.event_get_time_line = async (req, res, next) => {
+  await Event.findAll({
+    where: {},
+    include: [{
+        model: Category,
+        attributes: ["name"],
+      },
+    ],
+    raw:true,
+  })
+    .then((events) => {
+      console.log("events", events);
+      let aux = _.chain(events)
+      .groupBy("category.name")
+      .map((value, key) => ({ category: key, events: value }))
+      .value();
+      res.status(200).json({ status: 1, data: aux});
+    })
     .catch(async (error) => {
       let err = await generic_error(error, 1);
       next(err);
