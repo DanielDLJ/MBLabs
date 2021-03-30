@@ -1,13 +1,15 @@
 import React from 'react';
 import Routes from './routes';
-import { AuthProvider } from '../context/auth';
-//Por enquanto so tem um
-//So adicionar aqui 
-//caso precise de mais
+import {AuthProvider} from '../context/auth';
+import {EventProvider} from '../context/event';
+
+
 export default function Providers() {
   return (
     <AuthProvider>
-      <Routes />
+      <EventProvider>
+        <Routes />
+      </EventProvider>
     </AuthProvider>
   );
 }

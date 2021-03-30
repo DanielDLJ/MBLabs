@@ -1,26 +1,25 @@
-import React, {useEffect, useContext, useState} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {
-  Text,
   View,
+  Text,
   StyleSheet,
-  Dimensions,
   FlatList,
   Image,
 } from 'react-native';
-import ItemMenu from '../../components/ItemMenu';
 import AuthContext from '../../context/auth';
-import Eventontext from '../../context/event';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import EventContext from '../../context/event';
 import Card from '../../components/Card';
-function Home({navigation}) {
+import NeedLogged from '../NeedLogged/NeedLogged';
+
+function ListEvents({navigation}) {
   const {user} = useContext(AuthContext);
-  const {getHomeList, selectedEvent, setSelectedEvent} = useContext(Eventontext);
+  const {getEventList, setSelectedEvent, selectedEvent} = useContext(EventContext);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // useEffect(() => {
-  //   setLoading(false);
-  // }, []);
+
+  if(user === null){
+    return <NeedLogged navigation={navigation}/>
+  }
 
   useEffect(() => {
     fetchEvents();
@@ -31,8 +30,8 @@ function Home({navigation}) {
   }, [selectedEvent]);
 
   const fetchEvents = async () => {
-    console.log('events', await getHomeList());
-    setEvents(await getHomeList());
+    console.log('events', await getEventList());
+    setEvents(await getEventList());
     setLoading(false);
   };
 
@@ -40,7 +39,7 @@ function Home({navigation}) {
     <Card
       onPress={() => {
         setSelectedEvent(item);
-        navigation.navigate('ViewEvent');
+        navigation.navigate('EventTabNavigator');
       }}
       image={item.image}
       name={item.name}
@@ -66,22 +65,11 @@ function Home({navigation}) {
   return (
     <View behavior="padding" style={styles.container}>
       <FlatList
-        style={{marginTop: 10}}
-        contentContainerStyle={{flexGrow: 1}}
         data={events}
-        renderItem={({item}) => (
-          <View>
-            <Text style={styles.titleText}>{item.category}</Text>
-            <FlatList
-              horizontal
-              data={item.events}
-              renderItem={renderItem}
-              keyExtractor={(item2, index) => index}
-            />
-          </View>
-        )}
+        contentContainerStyle={{flexGrow: 1, alignItems: 'center'}}
+        renderItem={renderItem}
         ListEmptyComponent={listEmptyComponent}
-        keyExtractor={(item, index) => index}
+        keyExtractor={item => item._id}
       />
     </View>
   );
@@ -91,13 +79,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#b5b5b5',
-  },
-  //List
-  titleText: {
-    marginLeft: 20,
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white',
   },
   // Empty container
   containerEmpty: {
@@ -122,4 +103,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Home;
+export default ListEvents;
