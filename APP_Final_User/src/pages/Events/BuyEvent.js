@@ -1,23 +1,14 @@
 import React, {useState, useEffect, useContext} from 'react';
 import {
   View,
-  Text,
-  TouchableOpacity,
   StyleSheet,
-  Image,
-  SafeAreaView,
   ScrollView,
   KeyboardAvoidingView,
 } from 'react-native';
 import {Button, Chip} from 'react-native-paper';
-import api from '../../services/api';
 import AuthContext from '../../context/auth';
 import EventContext from '../../context/event';
-import axios from 'axios';
 import TextInput from '../../components/TextInput';
-import {TextInputMask} from 'react-native-masked-text';
-import BottomSheet from '../../components/BottomSheet';
-import ImagePicker from 'react-native-image-crop-picker';
 function BuyEvent(props) {
   const {company} = useContext(AuthContext);
   const {buyEvent} = useContext(EventContext);
@@ -70,7 +61,7 @@ function BuyEvent(props) {
                 placeholder="0"
                 returnKeyType="done"
                 keyboardType="number-pad"
-                value={quantity.value}
+                value={quantity.value.toString()}
                 onChangeText={text =>
                   setQuantity({value: text.replace(/\D/g, ''), error: ''})
                 }

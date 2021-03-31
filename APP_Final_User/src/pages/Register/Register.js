@@ -18,10 +18,11 @@ import moment from 'moment';
 export default function Register({ navigation }) {
   const { signUp } = useContext(AuthContext);
   const [loading, setLoading] = useState(false)
-  const [cpf, setCPF] = useState({ value: '98501796000', error: '' }); //Outro
-  // const [cpf, setCPF] = useState({ value: '41999741803', error: '' }); //Rio
-  const [name, setName] = useState({ value: 'Nova da Pessoa', error: '' });
-  const [email, setEmail] = useState({ value: 'new@new.com', error: '' });
+  // const [cpf, setCPF] = useState({ value: '98501796000', error: '' }); //Outro
+  // const [name, setName] = useState({ value: 'Nova da Pessoa', error: '' });//Outro
+  const [cpf, setCPF] = useState({ value: '41999741803', error: '' }); //Meu
+  const [name, setName] = useState({ value: 'Daniel Leme', error: '' });//Meu
+  const [email, setEmail] = useState({ value: 'daniel@hotmail.com', error: '' });//Meu
   const [birthday, setBirthday] = useState({ value: '04121994', error: '' });
   const [password, setPassword] = useState({ value: '123456', error: '' });
   const [password1, setPassword1] = useState({ value: '123456', error: '' });
