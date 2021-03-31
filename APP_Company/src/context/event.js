@@ -133,6 +133,7 @@ export const EventProvider = ({children}) => {
       createEvent.append('company_cnpj', company.cnpj);
       const result = await api.post('/event', createEvent);
       console.log(result.data);
+      setSelectedEvent(result.data.data)
       message = 'Evento Criado =) ';
       returnStatus = true;
     } catch (error) {

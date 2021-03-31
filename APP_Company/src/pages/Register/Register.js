@@ -17,11 +17,11 @@ import AuthContext from '../../context/auth';
 export default function Register({ navigation }) {
   const { signUp } = useContext(AuthContext);
   const [loading, setLoading] = useState(false)
-  const [cnpj, setCNPJ] = useState({ value: '31023681000137', error: '' }); //Outro
-  // const [cnpj, setCNPJ] = useState({ value: '12100515000142', error: '' }); //Rio
-  // const [name, setName] = useState({ value: 'Rock In Rio', error: '' }); //Rio
-  const [name, setName] = useState({ value: 'Nova Empresa', error: '' }); //Outro
-  const [email, setEmail] = useState({ value: 'new@new.comm', error: '' });
+  // const [cnpj, setCNPJ] = useState({ value: '31023681000137', error: '' }); //Outro
+  // const [name, setName] = useState({ value: 'Nova Empresa', error: '' }); //Outro
+  const [cnpj, setCNPJ] = useState({ value: '12100515000142', error: '' }); //Rio
+  const [name, setName] = useState({ value: 'Rock In Rio', error: '' }); //Rio
+  const [email, setEmail] = useState({ value: 'rock@rock.com', error: '' });
   const [password, setPassword] = useState({ value: '123456', error: '' });
   const [password1, setPassword1] = useState({ value: '123456', error: '' });
 
