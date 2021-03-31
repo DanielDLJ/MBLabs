@@ -106,10 +106,6 @@ function AddEvent(props) {
       createData.append('category_id', event.category);
 
       let result = await createEvent(createData);
-
-      if(result === true){
-        setUploadImage(null);
-      }
       
     } catch (error) {
       console.log('error handleSubmit', error);
