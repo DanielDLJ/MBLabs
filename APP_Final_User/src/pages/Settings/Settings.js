@@ -78,7 +78,7 @@ function Settings({navigation}) {
   }, [uploadImage]);
 
   useEffect(() => {
-    console.log(api.defaults.baseURL + '/' + user?.image.replace('\\', '/'))
+    console.log(api.defaults.baseURL + '/' + user?.image.replace('\\', '/'));
   }, []);
 
   const selectGalleryTypeUpload = async item => {
@@ -96,7 +96,9 @@ function Settings({navigation}) {
   return (
     <View style={styles.container}>
       <View style={styles.containerImagePerfil}>
-        <TouchableOpacity onPress={() => sheetRef.current.snapTo(1)}>
+        <TouchableOpacity
+          disabled={user !== null ? false : true}
+          onPress={() => sheetRef.current.snapTo(1)}>
           {uploadImage ? (
             <Image
               source={
@@ -114,7 +116,9 @@ function Settings({navigation}) {
                 user?.image
                   ? {
                       uri:
-                      api.defaults.baseURL + '/' + user?.image.replace('\\', '/'),
+                        api.defaults.baseURL +
+                        '/' +
+                        user?.image.replace('\\', '/'),
                     }
                   : require('../../../assets/img/avatar.jpg')
               }
