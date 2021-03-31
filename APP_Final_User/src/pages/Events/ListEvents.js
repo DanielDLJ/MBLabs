@@ -1,11 +1,5 @@
 import React, {useState, useEffect, useContext} from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Image,
-} from 'react-native';
+import {View, Text, StyleSheet, FlatList, Image} from 'react-native';
 import AuthContext from '../../context/auth';
 import EventContext from '../../context/event';
 import Card from '../../components/Card';
@@ -13,15 +7,18 @@ import NeedLogged from '../NeedLogged/NeedLogged';
 
 function ListEvents({navigation}) {
   const {user} = useContext(AuthContext);
-  const {getEventList, setSelectedEvent, selectedEvent} = useContext(EventContext);
+  const {getEventUsersList, setSelectedEvent, selectedEvent} = useContext(
+    EventContext,
+  );
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  if(user === null){
-    return <NeedLogged navigation={navigation}/>
+  if (user === null) {
+    return <NeedLogged navigation={navigation} />;
   }
 
   useEffect(() => {
+    // setLoading(false);
     fetchEvents();
   }, []);
 
@@ -30,8 +27,8 @@ function ListEvents({navigation}) {
   }, [selectedEvent]);
 
   const fetchEvents = async () => {
-    console.log('events', await getEventList());
-    setEvents(await getEventList());
+    console.log('events', await getEventUsersList());
+    setEvents(await getEventUsersList());
     setLoading(false);
   };
 
@@ -39,7 +36,7 @@ function ListEvents({navigation}) {
     <Card
       onPress={() => {
         setSelectedEvent(item);
-        navigation.navigate('EventTabNavigator');
+        navigation.navigate('ViewEvent');
       }}
       image={item.image}
       name={item.name}
@@ -64,12 +61,28 @@ function ListEvents({navigation}) {
 
   return (
     <View behavior="padding" style={styles.container}>
+      {loading === false && events.length > 0 ? (
+        <Text style={styles.headerText}>Meus Eventos</Text>
+      ) : null}
       <FlatList
+        style={{marginTop: 10}}
+        contentContainerStyle={{flexGrow: 1}}
         data={events}
-        contentContainerStyle={{flexGrow: 1, alignItems: 'center'}}
-        renderItem={renderItem}
+        renderItem={({item}) => (
+          <View>
+            <Text style={styles.titleText}>{item.category}</Text>
+            <FlatList
+              horizontal
+              data={item.events}
+              renderItem={item =>
+                renderItem({...item, category: item.category})
+              }
+              keyExtractor={(item2, index) => index}
+            />
+          </View>
+        )}
         ListEmptyComponent={listEmptyComponent}
-        keyExtractor={item => item._id}
+        keyExtractor={(item, index) => index}
       />
     </View>
   );
@@ -79,6 +92,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#b5b5b5',
+  },
+  headerText: {
+    marginTop: 20,
+    marginBottom: 20,
+    fontSize: 18,
+    alignSelf: 'center',
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  //List
+  titleText: {
+    marginLeft: 20,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'white',
   },
   // Empty container
   containerEmpty: {

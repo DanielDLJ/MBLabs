@@ -2,31 +2,41 @@ import React, {useState, useEffect, useContext} from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
   Image,
-  SafeAreaView,
   ScrollView,
   KeyboardAvoidingView,
 } from 'react-native';
-import {Button, Chip} from 'react-native-paper';
+import {Button} from 'react-native-paper';
 import api from '../../services/api';
 import AuthContext from '../../context/auth';
 import EventContext from '../../context/event';
-import TextInput from '../../components/TextInput';
-import {TextInputMask} from 'react-native-masked-text';
-import BottomSheet from '../../components/BottomSheet';
-import ImagePicker from 'react-native-image-crop-picker';
-function EditEvent({navigation}) {
-  const {company} = useContext(AuthContext);
-  const {
-    updateEvent,
-    setSelectedEvent,
-    selectedEvent,
-    deleteEvent,
-  } = useContext(EventContext);
+function EditEvent(props) {
+  const {user} = useContext(AuthContext);
+  const {selectedEvent, getEvent, desistEvent} = useContext(EventContext);
 
   useEffect(() => {}, [selectedEvent]);
+  useEffect(() => {
+    props.navigation.setOptions({
+      title: selectedEvent?.category?.name ? selectedEvent?.category?.name : '',
+    });
+  }, []);
+
+  useEffect(() => {
+    if (user !== null) getEvent();
+  }, [user]);
+
+  const handleBuy = () => {
+    if (user) {
+      props.navigation.navigate('BuyEvent');
+    } else {
+      props.navigation.navigate('Login');
+    }
+  };
+
+  const handleDesist = () => {
+    desistEvent();
+  };
 
   return (
     <View style={styles.container}>
@@ -56,22 +66,37 @@ function EditEvent({navigation}) {
                 }
               />
 
-              <View style={{flexDirection: 'row'}}>
-                <Button
-                  // loading={loading}
-                  style={[styles.btn, {marginRight: 20}]}
-                  mode="contained"
-                  onPress={() => handleSubmit()}>
-                  Comprar
-                </Button>
+              <View>
+                <Text style={styles.textTtitle}>{selectedEvent?.name}</Text>
+                <Text style={styles.textSubTitle}>
+                  {selectedEvent?.description}
+                </Text>
+                {selectedEvent?.user_events?.length > 0 ? (
+                  <Text style={styles.textQuantity}>
+                    Quantidade: {selectedEvent?.user_events[0].quantity}
+                  </Text>
+                ) : null}
+              </View>
 
-                <Button
-                  // loading={loading}
-                  style={[styles.btn, {backgroundColor: 'red'}]}
-                  mode="contained"
-                  onPress={() => handleDelete()}>
-                  Desistir
-                </Button>
+              <View style={{flexDirection: 'row'}}>
+                {user === null || selectedEvent?.user_events?.length === 0 ? (
+                  <Button
+                    // loading={loading}
+                    style={[styles.btn, {marginRight: 20}]}
+                    mode="contained"
+                    onPress={() => handleBuy()}>
+                    {user === null ? 'Logar e ' : ''}Comprar
+                  </Button>
+                ) : null}
+                {user !== null && selectedEvent?.user_events?.length > 0 ? (
+                  <Button
+                    // loading={loading}
+                    style={[styles.btn, {backgroundColor: 'red'}]}
+                    mode="contained"
+                    onPress={() => handleDesist()}>
+                    Desistir
+                  </Button>
+                ) : null}
               </View>
             </View>
           </View>
@@ -110,41 +135,26 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     // backgroundColor:"red"
   },
-  gif: {
-    flex: 1,
-    position: 'absolute',
-    height: 50,
-    width: 50,
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'red',
-  },
-  text: {
+  textTtitle: {
     marginTop: 20,
     marginBottom: 0,
-    fontSize: 20,
-    alignSelf: 'flex-start',
+    fontSize: 25,
+    alignSelf: 'center',
     color: 'white',
   },
-  textError: {
+  textSubTitle: {
+    marginTop: 8,
+    marginBottom: 20,
+    fontSize: 16,
+    alignSelf: 'flex-start',
+    color: 'black',
+  },
+  textQuantity: {
     marginTop: 0,
     marginBottom: 20,
-    fontSize: 17,
-    alignSelf: 'flex-start',
-    color: 'red',
-  },
-  categoryContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    marginBottom: 20,
-  },
-  cilp: {
-    marginTop: 8,
+    fontSize: 16,
+    alignSelf: 'center',
+    color: 'black',
   },
   btn: {
     marginTop: 20,

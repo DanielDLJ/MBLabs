@@ -5,7 +5,7 @@ import AuthContext from './auth';
 const EventContext = createContext({});
 
 export const EventProvider = ({children}) => {
-  const {company} = useContext(AuthContext);
+  const {company, user} = useContext(AuthContext);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
   function toastMessage(message, returnStatus) {
@@ -29,19 +29,20 @@ export const EventProvider = ({children}) => {
   }
 
   async function getHomeList() {
+    let query = '';
+    if (user) query = '?cpf=' + user.cpf;
     try {
-      const result = await api.get('/timeLine');
-      console.log(result.data);
+      const result = await api.get('/timeLine' + query);
       return result.data.data;
     } catch (error) {
-      console.log("error",error)
+      console.log('error', error);
       return [];
     }
   }
 
   async function getEventUsersList() {
     try {
-      const result = await api.get('/event/' + selectedEvent.id + '/users');
+      const result = await api.get('/users/' + user.cpf + '/event');
       console.log(result.data);
       return result.data.data;
     } catch (error) {
@@ -49,40 +50,19 @@ export const EventProvider = ({children}) => {
     }
   }
 
-  async function getEvent(id) {
+  async function getEvent() {
     let message = '';
     let returnStatus = false;
+    let query = '';
+    if (user) query = '?cpf=' + user.cpf;
     try {
-      const result = await api.post('/event', newCompany);
-      console.log(result.data);
-      await storeCompany(result.data.data);
-      message = 'Bem-vindo ' + result.data.data.name;
+      const result = await api.get('/event/' + selectedEvent.id + '/' + query);
+      console.log('getEvent', result.data);
+      setSelectedEvent(result.data.data);
       returnStatus = true;
     } catch (error) {
       returnStatus = false;
-      console.log('error Register', error);
-      console.log('error Register', error.response);
-      switch (error.response === undefined ? 65465 : error.response.status) {
-        case 406:
-          message = 'Formato de CNPJ, nome, senha ou email inválido.';
-          break;
-        case 409:
-          const errorCode = error.response.data.error.code;
-          if (errorCode === 3 || errorCode === 4) {
-            message = error.response.data.error.message;
-          } else {
-            message = 'Erro imprevisto';
-          }
-          break;
-        case 500:
-          message = 'Problemas com o servidor.';
-          break;
-        default:
-          message = 'Verifique sua conexão com a internet.';
-          break;
-      }
     }
-    toastMessage(message, returnStatus);
     return returnStatus;
   }
 
@@ -126,27 +106,25 @@ export const EventProvider = ({children}) => {
     return returnStatus;
   }
 
-  async function createEvent(createEvent) {
+  async function buyEvent(quantity) {
     let message = '';
     let returnStatus = false;
     try {
-      console.log('company_cnpj', company.cnpj);
-      createEvent.append('company_cnpj', company.cnpj);
-      const result = await api.post('/event', createEvent);
-      console.log(result.data);
-      message = 'Evento Criado =) ';
+      const result = await api.post('/users/' + user.cpf + '/buyEvent', {
+        idEvent: selectedEvent.id,
+        quantity: quantity,
+      });
+      message = 'Evento Comprado!';
+      setSelectedEvent(result.data.data);
       returnStatus = true;
     } catch (error) {
       returnStatus = false;
-      console.log('error update', error);
-      console.log('error update', error.response);
+      console.log('error buyEvent', error);
+      console.log('error buyEvent', error.response);
       switch (error.response === undefined ? 65465 : error.response.status) {
-        case 406:
-          message = 'Formato de nome, descrição ou categoria inválido.';
-          break;
         case 409:
           const errorCode = error.response.data.error.code;
-          if (errorCode === 3 || errorCode === 4) {
+          if (errorCode === 2) {
             message = error.response.data.error.message;
           } else {
             message = 'Erro imprevisto';
@@ -164,30 +142,21 @@ export const EventProvider = ({children}) => {
     return returnStatus;
   }
 
-  async function deleteEvent() {
+  async function desistEvent() {
     let message = '';
     let returnStatus = false;
     try {
-      const result = await api.delete('/event/'+selectedEvent.id);
-      message = 'Evento Deletado!';
-      setSelectedEvent({...selectedEvent,id:-1})
+      const result = await api.post('/users/' + user.cpf + '/desistEvent', {
+        idEvent: selectedEvent.id,
+      });
+      message = 'Que pena!';
+      setSelectedEvent(result.data.data);
       returnStatus = true;
     } catch (error) {
       returnStatus = false;
-      console.log('error update', error);
-      console.log('error update', error.response);
+      console.log('error desistEvent', error);
+      console.log('error desistEvent', error.response);
       switch (error.response === undefined ? 65465 : error.response.status) {
-        case 406:
-          message = 'Formato de nome, descrição ou categoria inválido.';
-          break;
-        case 409:
-          const errorCode = error.response.data.error.code;
-          if (errorCode === 3 || errorCode === 4) {
-            message = error.response.data.error.message;
-          } else {
-            message = 'Erro imprevisto';
-          }
-          break;
         case 500:
           message = 'Problemas com o servidor.';
           break;
@@ -208,9 +177,9 @@ export const EventProvider = ({children}) => {
         updateEvent,
         getHomeList,
         getEvent,
-        createEvent,
+        buyEvent,
         getEventUsersList,
-        deleteEvent,
+        desistEvent,
       }}>
       {children}
     </EventContext.Provider>

@@ -82,9 +82,13 @@ export default function Register({ navigation }) {
       password: password.value,
 
     }
-    await signUp(newUser)
+    let result = await signUp(newUser)
     setLoading(false)
 
+    
+    if(result){
+      navigation.pop(2)
+    }
   }
 
   return (

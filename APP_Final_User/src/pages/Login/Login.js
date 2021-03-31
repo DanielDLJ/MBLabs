@@ -38,8 +38,12 @@ export default function Login({ navigation }) {
     }
 
     setLoading(true)
-    await signIn(cpf.value.replace(/\D/g,''), password.value)
+    let result = await signIn(cpf.value.replace(/\D/g,''), password.value)
     setLoading(false)
+
+    if(result){
+      navigation.pop()
+    }
 
   }
 

@@ -14,10 +14,12 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Card from '../../components/Card';
 function Home({navigation}) {
   const {user} = useContext(AuthContext);
-  const {getHomeList, selectedEvent, setSelectedEvent} = useContext(Eventontext);
+  const {getHomeList, selectedEvent, setSelectedEvent} = useContext(
+    Eventontext,
+  );
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   // useEffect(() => {
   //   setLoading(false);
   // }, []);
@@ -31,7 +33,7 @@ function Home({navigation}) {
   }, [selectedEvent]);
 
   const fetchEvents = async () => {
-    console.log('events', await getHomeList());
+    // console.log('events', await getHomeList());
     setEvents(await getHomeList());
     setLoading(false);
   };
@@ -75,7 +77,9 @@ function Home({navigation}) {
             <FlatList
               horizontal
               data={item.events}
-              renderItem={renderItem}
+              renderItem={item =>
+                renderItem({...item, category: item.category})
+              }
               keyExtractor={(item2, index) => index}
             />
           </View>
