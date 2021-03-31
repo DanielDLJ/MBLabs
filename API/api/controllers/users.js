@@ -1,7 +1,11 @@
 // Database
 const Op = require("sequelize").Sequelize.Op;
 const User = require("../models/User");
+const Event = require("../models/Event");
+const EventUser = require("../models/EventUser");
+const Category = require("../models/Category");
 
+const _ = require("lodash");
 const fs = require("fs");
 const bcrypt = require("bcryptjs");
 const salt = bcrypt.genSaltSync(10);
@@ -214,6 +218,116 @@ exports.users_delete_users = async (req, res, next) => {
     err.status = 406;
     next(err);
   }
+};
+
+exports.users_get_events = async (req, res, next) => {
+  const cpf = req.params.userCPF;
+  Event.findAll({
+    where: {},
+    include: [
+      {
+        model: Category,
+        attributes: ["name"],
+      },
+      {
+        model: EventUser,
+        attributes: ["cpf_user", "quantity"],
+        where: { cpf_user: cpf },
+        required: true,
+      },
+    ],
+  })
+    .then((events) => {
+      let aux = _.chain(events)
+        .groupBy("category.name")
+        .map((value, key) => ({ category: key, events: value }))
+        .value();
+      res.status(200).json({ status: 1, data: aux });
+    })
+    .catch(async (error) => {
+      let err = await generic_error(error, 1);
+      next(err);
+    });
+};
+
+exports.users_buy_event = async (req, res, next) => {
+  const cpf = req.params.userCPF;
+  let { idEvent, quantity } = req.body;
+  EventUser.create({ cpf_user: cpf, id_event: idEvent, quantity })
+    .then((create) => {
+      Event.findByPk(idEvent, {
+        include: [
+          {
+            model: Category,
+            attributes: ["name"],
+          },
+          {
+            model: EventUser,
+            attributes: ["cpf_user", "quantity"],
+            where: { cpf_user: cpf },
+            required: true,
+          },
+        ],
+      })
+        .then((event) => {
+          res.status(200).json({ status: 1, data: event ? event : {} });
+        })
+        .catch(async (error) => {
+          let err = await generic_error(error, 1);
+          next(err);
+        });
+    })
+    .catch(async (error) => {
+      let err = await generic_error(error, 3);
+      if (error && error.original && error.original.errno === 1062) {
+        //ER_DUP_ENTRY
+        err.status = 409;
+        if (error.original.sqlMessage?.includes("PRIMARY")) {
+          err.code = 2;
+          err.message = "Usuário já comprou esse evento!";
+        }
+      }
+      next(err);
+    });
+};
+
+exports.users_desist_event = async (req, res, next) => {
+  const cpf = req.params.userCPF;
+  let { idEvent, quantity } = req.body;
+
+  EventUser.destroy({
+    where: {
+      cpf_user: cpf,
+      id_event: idEvent,
+    }
+  })
+    .then((events) => {
+      Event.findByPk(idEvent, {
+        include: [
+          {
+            model: Category,
+            attributes: ["name"],
+          },
+          {
+            model: EventUser,
+            attributes: ["cpf_user", "quantity"],
+            where: { cpf_user: cpf },
+            required: false,
+          },
+        ],
+      })
+        .then((event) => {
+          res.status(200).json({ status: 1, data: event ? event : {} });
+        })
+        .catch(async (error) => {
+          let err = await generic_error(error, 1);
+          next(err);
+        });
+    })
+    .catch(async (error) => {
+      let err = await generic_error(error, 2);
+      next(err);
+    });
 };
 
 async function generic_error(error, code) {

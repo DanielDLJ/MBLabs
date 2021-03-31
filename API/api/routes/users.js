@@ -23,4 +23,17 @@ router.patch('/:userCPF', upload_User.single("image"),  UserController.users_upd
 router.delete('/:userCPF', UserController.users_delete_users)
 
 
+/**
+ * User Event
+ */
+
+//Get events by user
+router.get('/:userCPF/event', UserController.users_get_events)
+
+//User buy event
+router.post('/:userCPF/buyEvent', UserController.users_buy_event)
+
+//User desist event
+router.post('/:userCPF/desistEvent', UserController.users_desist_event)
+
 module.exports = router

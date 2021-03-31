@@ -87,7 +87,26 @@ exports.event_create_event = async (req, res, next) => {
 
 exports.event_get_event = (req, res, next) => {
   const id = req.params.eventID;
-  Event.findByPk(id)
+  const cpf =
+    req.query.cpf == "" || req.query.cpf == undefined ? "" : req.query.cpf;
+  let include = {};
+  if (cpf)
+    include = {
+      model: EventUser,
+      attributes: ["cpf_user", "quantity"],
+      where: { cpf_user: cpf },
+      required: false,
+    };
+
+  Event.findByPk(id, {
+    include: [
+      {
+        model: Category,
+        attributes: ["name"],
+      },
+      include,
+    ],
+  })
     .then((event) => {
       res.status(200).json({ status: 1, data: event ? event : {} });
     })
@@ -233,22 +252,30 @@ exports.event_get_users = (req, res, next) => {
 };
 
 exports.event_get_time_line = async (req, res, next) => {
+  const cpf =
+    req.query.cpf == "" || req.query.cpf == undefined ? "" : req.query.cpf;
+
   await Event.findAll({
     where: {},
-    include: [{
+    include: [
+      {
         model: Category,
         attributes: ["name"],
       },
+      {
+        model: EventUser,
+        attributes: ["cpf_user", "quantity"],
+        where: { cpf_user: cpf },
+        required: false,
+      },
     ],
-    raw:true,
   })
     .then((events) => {
-      console.log("events", events);
       let aux = _.chain(events)
-      .groupBy("category.name")
-      .map((value, key) => ({ category: key, events: value }))
-      .value();
-      res.status(200).json({ status: 1, data: aux});
+        .groupBy("category.name")
+        .map((value, key) => ({ category: key, events: value }))
+        .value();
+      res.status(200).json({ status: 1, data: aux });
     })
     .catch(async (error) => {
       let err = await generic_error(error, 1);
