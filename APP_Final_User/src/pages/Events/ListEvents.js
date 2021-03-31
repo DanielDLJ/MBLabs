@@ -13,23 +13,25 @@ function ListEvents({navigation}) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  if (user === null) {
-    return <NeedLogged navigation={navigation} />;
-  }
-
   useEffect(() => {
     // setLoading(false);
-    fetchEvents();
+    if (user !== null) fetchEvents();
+    else setEvents([])
   }, []);
 
   useEffect(() => {
-    fetchEvents();
-  }, [selectedEvent]);
+    if (user !== null) fetchEvents();
+    else setEvents([])
+  }, [selectedEvent, user]);
 
   const fetchEvents = async () => {
-    console.log('events', await getEventUsersList());
-    setEvents(await getEventUsersList());
-    setLoading(false);
+    try {
+      console.log('events', await getEventUsersList());
+      setEvents(await getEventUsersList());
+      setLoading(false);
+    } catch (error) {
+      console.log("fetchEvents ListEvents", error)
+    }
   };
 
   const renderItem = ({item}) => (
@@ -44,6 +46,11 @@ function ListEvents({navigation}) {
   );
 
   const listEmptyComponent = () => {
+    if (user === null) {
+      return <NeedLogged navigation={navigation} />;
+    }
+
+
     if (loading) {
       return (
         <Image
@@ -54,6 +61,7 @@ function ListEvents({navigation}) {
     }
     return (
       <View style={styles.containerEmpty}>
+        
         <Text style={styles.emptyText}>Não existe Eventos</Text>
       </View>
     );
